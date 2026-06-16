@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontuação Individual — Liga Grajauense 3x3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0f1117;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+      padding: 16px;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 20px; }
+    .header-sub {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 4px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Placar geral ── */
+    .placar-geral {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+    }
+    .placar-nome {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .placar-nome.a { color: #e8500a; text-align: right; }
+    .placar-nome.b { color: #1a6fd4; text-align: left; }
+    .placar-numeros {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .placar-numero {
+      font-size: 40px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #fff;
+      transition: color 0.2s;
+    }
+    .placar-numero.lider-a { color: #e8500a; }
+    .placar-numero.lider-b { color: #1a6fd4; }
+    .placar-x { color: rgba(255,255,255,0.3); font-size: 24px; font-weight: 300; }
+
+    /* ── Times ── */
+    .times-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .time-card { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+    .time-header {
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .time-a .time-header { background: #e8500a; }
+    .time-b .time-header { background: #1a6fd4; }
+
+    .time-nome-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: inherit;
+      flex: 1;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      min-width: 0;
+    }
+    .time-nome-input::placeholder { color: rgba(255,255,255,0.5); }
+
+    .time-total {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* ── Jogador ── */
+    .jogador-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .jogador-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .jogador-nome-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      flex: 1;
+      padding: 2px 0;
+      outline: none;
+      min-width: 0;
+    }
+    .jogador-nome-input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .jogador-pontos {
+      font-size: 22px;
+      font-weight: 800;
+      min-width: 36px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .jogador-btns { display: flex; gap: 6px; }
+    .btn-add {
+      flex: 1;
+      padding: 6px 0;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+    .btn-add:hover { background: rgba(255,255,255,0.22); }
+
+    .btn-sub {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.6);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+    .btn-sub:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+    .btn-sub:disabled { color: rgba(255,255,255,0.2); cursor: not-allowed; }
+
+    /* ── Resetar ── */
+    .btn-reset-wrap { text-align: center; margin-top: 20px; }
+    .btn-reset {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.5);
+      border-radius: 8px;
+      padding: 8px 24px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-reset:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* ── Responsivo mobile ── */
+    @media (max-width: 480px) {
+      .placar-nome { font-size: 11px; }
+      .placar-numero { font-size: 30px; }
+      .time-nome-input { font-size: 13px; }
+      .time-total { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <p class="header-sub">Liga Grajauense de Basquete 3x3</p>
+    <h1>Pontuação Individual</h1>
+  </div>
+
+  <!-- Placar geral -->
+  <div class="placar-geral">
+    <span class="placar-nome a" id="placar-nome-a">Time A</span>
+    <div class="placar-numeros">
+      <span class="placar-numero" id="placar-total-a">0</span>
+      <span class="placar-x">×</span>
+      <span class="placar-numero" id="placar-total-b">0</span>
+    </div>
+    <span class="placar-nome b" id="placar-nome-b">Time B</span>
+  </div>
+
+  <!-- Times -->
+  <div class="times-wrapper">
+
+    <!-- Time A -->
+    <div class="time-card time-a" id="time-a">
+      <div class="time-header">
+        <input class="time-nome-input" id="nome-time-a" placeholder="Time A" value="Time A">
+        <span class="time-total" id="total-a">0</span>
+      </div>
+      <!-- jogadores gerados pelo JS -->
+    </div>
+
+    <!-- Time B -->
+    <div class="time-card time-b" id="time-b">
+      <div class="time-header">
+        <input class="time-nome-input" id="nome-time-b" placeholder="Time B" value="Time B">
+        <span class="time-total" id="total-b">0</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Resetar -->
+  <div class="btn-reset-wrap">
+    <button class="btn-reset" id="btn-resetar">Resetar pontos</button>
+  </div>
+
+</div>
+
+<script>
+  // ── Estado ──────────────────────────────────────────────────
+  const estado = {
+    a: { nome: "Time A", jogadores: [{nome:"",pts:0},{nome:"",pts:0},{nome:"",pts:0},{nome:"",pts:0}] },
+    b: { nome: "Time B", jogadores: [{nome:"",pts:0},{nome:"",pts:0},{nome:"",pts:0},{nome:"",pts:0}] },
+  };
+
+  // ── Renderiza jogadores de um time ──────────────────────────
+  function renderizarJogadores(time) {
+    const container = document.getElementById(`time-${time}`);
+    // remove cards antigos (mantém o header)
+    container.querySelectorAll(".jogador-card").forEach(el => el.remove());
+
+    estado[time].jogadores.forEach((j, i) => {
+      const card = document.createElement("div");
+      card.className = "jogador-card";
+      card.innerHTML = `
+        <div class="jogador-top">
+          <input class="jogador-nome-input" placeholder="Nome do jogador" value="${j.nome}">
+          <span class="jogador-pontos">${j.pts}</span>
+        </div>
+        <div class="jogador-btns">
+          <button class="btn-add" data-v="1">+1</button>
+          <button class="btn-add" data-v="2">+2</button>
+          <button class="btn-add" data-v="3">+3</button>
+          <button class="btn-sub" ${j.pts === 0 ? "disabled" : ""}>−1</button>
+        </div>
+      `;
+
+      // Nome
+      card.querySelector(".jogador-nome-input").addEventListener("input", e => {
+        estado[time].jogadores[i].nome = e.target.value;
+      });
+
+      // +1 +2 +3
+      card.querySelectorAll(".btn-add").forEach(btn => {
+        btn.addEventListener("click", () => {
+          estado[time].jogadores[i].pts += parseInt(btn.dataset.v);
+          atualizar();
+        });
+      });
+
+      // −1
+      card.querySelector(".btn-sub").addEventListener("click", () => {
+        if (estado[time].jogadores[i].pts > 0) {
+          estado[time].jogadores[i].pts--;
+          atualizar();
+        }
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  // ── Atualiza totais e placar ────────────────────────────────
+  function atualizar() {
+    ["a", "b"].forEach(time => {
+      renderizarJogadores(time);
+      const total = estado[time].jogadores.reduce((s, j) => s + j.pts, 0);
+      document.getElementById(`total-${time}`).textContent = total;
+      document.getElementById(`placar-total-${time}`).textContent = total;
+    });
+
+    // Destaca líder no placar
+    const ta = estado.a.jogadores.reduce((s,j) => s+j.pts, 0);
+    const tb = estado.b.jogadores.reduce((s,j) => s+j.pts, 0);
+    const elA = document.getElementById("placar-total-a");
+    const elB = document.getElementById("placar-total-b");
+    elA.className = "placar-numero" + (ta > tb ? " lider-a" : "");
+    elB.className = "placar-numero" + (tb > ta ? " lider-b" : "");
+  }
+
+  // ── Nomes dos times no placar ───────────────────────────────
+  document.getElementById("nome-time-a").addEventListener("input", e => {
+    estado.a.nome = e.target.value;
+    document.getElementById("placar-nome-a").textContent = e.target.value || "Time A";
+  });
+  document.getElementById("nome-time-b").addEventListener("input", e => {
+    estado.b.nome = e.target.value;
+    document.getElementById("placar-nome-b").textContent = e.target.value || "Time B";
+  });
+
+  // ── Resetar ─────────────────────────────────────────────────
+  document.getElementById("btn-resetar").addEventListener("click", () => {
+    ["a", "b"].forEach(time => {
+      estado[time].jogadores.forEach(j => j.pts = 0);
+    });
+    atualizar();
+  });
+
+  // ── Init ────────────────────────────────────────────────────
+  atualizar();
+</script>
+
+</body>
+</html>
